@@ -1,0 +1,210 @@
+@font-face {
+    font-family: "Noto Sans Mono";
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url("../assets/fonts/noto-mono-xenon.woff2") format("woff2");
+}
+
+:root {
+    --bg: #000000;
+    --text: #e2e2e4;
+    --muted: #75757e;
+
+    --border: rgba(255, 255, 255, 0.22);
+    --soft-border: rgba(255, 255, 255, 0.09);
+
+    --surface: #15161a;
+    --surface-hover: #1d1e23;
+    --surface-press: #24262d;
+
+    --focus: #2f8af9;
+
+    --auto: #f19a38;
+    --audio: #b164ff;
+    --mute: #ef5f5f;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "IBM Plex Mono", "Noto Sans Mono", ui-monospace, SFMono-Regular,
+        Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+    width: 400px;
+    height: 600px;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+}
+
+.popup-app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 14px;
+}
+
+.input-wrap {
+    width: 100%;
+    min-height: 38px;
+    border-radius: 11px;
+    border: 1px solid var(--border);
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.input-wrap:focus-within {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 1px rgba(47, 138, 249, 0.25);
+}
+
+.link-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--muted);
+    position: absolute;
+    left: 12px;
+    stroke-width: 1.75px;
+    pointer-events: none;
+}
+
+#urlInput {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1;
+    padding: 11px 12px 11px 34px;
+}
+
+#urlInput::placeholder {
+    color: var(--muted);
+    opacity: 1;
+}
+
+.controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.mode-group {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 11px;
+    border: 1px solid var(--soft-border);
+    background: var(--surface);
+    overflow: hidden;
+}
+
+.mode-button {
+    min-height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.12s;
+}
+
+.mode-button + .mode-button {
+    border-left: 1px solid var(--soft-border);
+}
+
+.mode-button span {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.1px;
+}
+
+.mode-icon {
+    width: 15px;
+    height: 15px;
+    stroke-width: 1.9px;
+}
+
+.mode-icon.auto {
+    color: var(--auto);
+}
+
+.mode-icon.audio {
+    color: var(--audio);
+}
+
+.mode-icon.mute {
+    color: var(--mute);
+}
+
+.mode-button.active {
+    background: #f3f3f4;
+    color: #111216;
+    cursor: default;
+}
+
+.mode-button:focus-visible,
+.download-button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+}
+
+@media (hover: hover) {
+    .mode-button:hover:not(.active),
+    .download-button:hover {
+        background: var(--surface-hover);
+    }
+}
+
+.mode-button:active:not(.active),
+.download-button:active {
+    background: var(--surface-press);
+}
+
+.download-button {
+    min-height: 36px;
+    border: 1px solid var(--soft-border);
+    border-radius: 11px;
+    background: var(--surface);
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    transition: background-color 0.12s;
+}
+
+.download-button span {
+    font-size: 13px;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.1px;
+}
+
+.download-icon {
+    width: 16px;
+    height: 16px;
+    stroke-width: 1.8px;
+}
+
+.download-button.pulse {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+}
