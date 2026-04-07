@@ -192,6 +192,11 @@ body {
     transition: background-color 0.12s;
 }
 
+.download-button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
 .download-button span {
     font-size: 13px;
     line-height: 1;
@@ -207,4 +212,24 @@ body {
 
 .download-button.pulse {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+}
+
+.status-line {
+    min-height: 16px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--muted);
+    letter-spacing: -0.1px;
+    padding: 1px 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-line.ok {
+    color: #64d18d;
+}
+
+.status-line.error {
+    color: #ff8080;
 }

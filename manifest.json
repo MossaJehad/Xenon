@@ -3,6 +3,13 @@
     "name": "Xenon",
     "description": "Xenon-style popup shell",
     "version": "0.1.0",
+    "permissions": [
+        "downloads"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
     "action": {
         "default_title": "Xenon",
         "default_popup": "popup/popup.html"
