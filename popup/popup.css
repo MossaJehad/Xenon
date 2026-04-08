@@ -7,22 +7,25 @@
 }
 
 :root {
-    --bg: #000000;
-    --text: #e2e2e4;
-    --muted: #75757e;
+    --bg: #09090b;
+    --text: #fafafa;
+    --muted: #a1a1aa;
 
-    --border: rgba(255, 255, 255, 0.22);
-    --soft-border: rgba(255, 255, 255, 0.09);
+    --border: rgba(255, 255, 255, 0.12);
+    --soft-border: rgba(255, 255, 255, 0.06);
 
-    --surface: #15161a;
-    --surface-hover: #1d1e23;
-    --surface-press: #24262d;
+    --surface: #18181b;
+    --surface-hover: #27272a;
+    --surface-press: #3f3f46;
 
-    --focus: #2f8af9;
+    --focus: #3b82f6;
 
-    --auto: #f19a38;
-    --audio: #b164ff;
-    --mute: #ef5f5f;
+    --auto: #fbbf24;
+    --audio: #a78bfa;
+    --mute: #f87171;
+
+    --radius-popup: 20px;
+    --radius-el: 14px;
 }
 
 * {
@@ -34,49 +37,64 @@
 
 html,
 body {
-    width: 400px;
-    height: 600px;
     margin: 0;
+    padding: 0;
+    width: 440px;
+    height: max-content;
+    background: transparent;
+}
+
+body {
     background: var(--bg);
     color: var(--text);
     overflow: hidden;
+    border-radius: var(--radius-popup);
+    /* Inset box-shadow helps define the rounded corners clearly in certain OS extension popup views */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
 .popup-app {
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 6px;
-    padding: 14px;
+    gap: 16px;
+    padding: 24px;
+	border-radius: var(--radius-popup);
 }
 
 .input-wrap {
     width: 100%;
-    min-height: 38px;
-    border-radius: 11px;
+    min-height: 46px;
+    border-radius: var(--radius-el);
     border: 1px solid var(--border);
     position: relative;
     display: flex;
     align-items: center;
     overflow: hidden;
-    background: var(--bg);
+    background: var(--surface);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .input-wrap:focus-within {
     border-color: var(--focus);
-    box-shadow: 0 0 0 1px rgba(47, 138, 249, 0.25);
+    background: var(--bg);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
 .link-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     color: var(--muted);
     position: absolute;
-    left: 12px;
+    left: 14px;
     stroke-width: 1.75px;
     pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.input-wrap:focus-within .link-icon {
+    color: var(--focus);
 }
 
 #urlInput {
@@ -85,9 +103,9 @@ body {
     outline: none;
     background: transparent;
     color: var(--text);
-    font-size: 13px;
-    line-height: 1;
-    padding: 11px 12px 11px 34px;
+    font-size: 14px;
+    line-height: 1.2;
+    padding: 12px 14px 12px 42px;
 }
 
 #urlInput::placeholder {
@@ -97,32 +115,32 @@ body {
 
 .controls-row {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
 }
 
 .mode-group {
     display: inline-flex;
     align-items: center;
-    border-radius: 11px;
-    border: 1px solid var(--soft-border);
+    border-radius: var(--radius-el);
+    border: 1px solid var(--border);
     background: var(--surface);
     overflow: hidden;
 }
 
 .mode-button {
-    min-height: 36px;
+    height: 42px;
     border: none;
     background: transparent;
     color: var(--text);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 0 12px;
+    padding: 0 14px;
     line-height: 1;
     cursor: pointer;
-    transition: background-color 0.12s;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .mode-button + .mode-button {
@@ -133,32 +151,33 @@ body {
     font-size: 13px;
     line-height: 1;
     font-weight: 500;
-    letter-spacing: -0.1px;
+    letter-spacing: -0.2px;
 }
 
 .mode-icon {
-    width: 15px;
-    height: 15px;
-    stroke-width: 1.9px;
+    width: 16px;
+    height: 16px;
+    stroke-width: 2px;
+    opacity: 0.8;
 }
 
-.mode-icon.auto {
-    color: var(--auto);
-}
-
-.mode-icon.audio {
-    color: var(--audio);
-}
-
-.mode-icon.mute {
-    color: var(--mute);
-}
+.mode-icon.auto { color: var(--auto); }
+.mode-icon.audio { color: var(--audio); }
+.mode-icon.mute { color: var(--mute); }
 
 .mode-button.active {
-    background: #f3f3f4;
-    color: #111216;
+    background: #fafafa;
+    color: #09090b;
     cursor: default;
 }
+
+.mode-button.active .mode-icon {
+    opacity: 1;
+}
+
+.mode-button.active .mode-icon.auto { color: #d97706; }
+.mode-button.active .mode-icon.audio { color: #7c3aed; }
+.mode-button.active .mode-icon.mute { color: #dc2626; }
 
 .mode-button:focus-visible,
 .download-button:focus-visible {
@@ -168,68 +187,96 @@ body {
 
 @media (hover: hover) {
     .mode-button:hover:not(.active),
-    .download-button:hover {
+    .download-button:hover:not(:disabled) {
         background: var(--surface-hover);
+    }
+
+    .download-button:hover:not(:disabled) {
+        background: #2563eb;
     }
 }
 
 .mode-button:active:not(.active),
-.download-button:active {
+.download-button:active:not(:disabled) {
     background: var(--surface-press);
 }
 
+.download-button:active:not(:disabled) {
+    background: #1d4ed8;
+}
+
 .download-button {
-    min-height: 36px;
-    border: 1px solid var(--soft-border);
-    border-radius: 11px;
-    background: var(--surface);
-    color: var(--text);
+    height: 42px;
+    border: 1px solid var(--focus);
+    border-radius: var(--radius-el);
+    background: var(--focus);
+    color: #ffffff;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    flex: 1;
     gap: 8px;
-    padding: 0 14px;
+    padding: 0 16px;
     cursor: pointer;
-    transition: background-color 0.12s;
+    transition: all 0.15s ease;
+    box-shadow: 0 2px 8px -2px rgba(59, 130, 246, 0.4);
 }
 
 .download-button:disabled {
-    opacity: 0.55;
-    cursor: default;
+    opacity: 0.5;
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--muted);
+    box-shadow: none;
+    cursor: not-allowed;
 }
 
 .download-button span {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1;
-    font-weight: 500;
-    letter-spacing: -0.1px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
 }
 
 .download-icon {
-    width: 16px;
-    height: 16px;
-    stroke-width: 1.8px;
+    width: 18px;
+    height: 18px;
+    stroke-width: 2px;
 }
 
 .download-button.pulse {
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+    animation: downloadPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes downloadPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    100% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
 }
 
 .status-line {
-    min-height: 16px;
-    font-size: 11px;
-    line-height: 1.3;
+    min-height: 18px;
+    font-size: 12px;
+    line-height: 1.4;
     color: var(--muted);
     letter-spacing: -0.1px;
-    padding: 1px 2px 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
+    padding: 0 4px;
 }
 
 .status-line.ok {
-    color: #64d18d;
+    color: #34d399;
 }
 
 .status-line.error {
-    color: #ff8080;
+    color: #fb7185;
 }

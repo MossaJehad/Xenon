@@ -1,69 +1,72 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Xenon</title>
-    <link rel="stylesheet" href="popup.css" />
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Xenon</title>
+	<link rel="stylesheet" href="popup.css" />
 </head>
+
 <body>
-    <main class="popup-app" aria-label="xenon popup">
-        <label class="input-wrap" for="urlInput" aria-label="video url">
-            <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                <path d="M10.5 13.5l3-3" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M7 15.9l-1.9 1.9a3 3 0 1 1-4.2-4.2L2.8 11.7a3 3 0 0 1 4.2 0" stroke-linecap="round" stroke-linejoin="round"></path>
-                <path d="M17 8.1l1.9-1.9a3 3 0 1 1 4.2 4.2l-1.9 1.9a3 3 0 0 1-4.2 0" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            <input
-                id="urlInput"
-                type="url"
-                spellcheck="false"
-                autocomplete="off"
-                placeholder="paste the link here"
-            />
-        </label>
+	<main class="popup-app" aria-label="xenon popup">
+		<label class="input-wrap" for="urlInput" aria-label="video url">
+			<svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+				<path d="M10.5 13.5l3-3" stroke-linecap="round" stroke-linejoin="round"></path>
+				<path d="M7 15.9l-1.9 1.9a3 3 0 1 1-4.2-4.2L2.8 11.7a3 3 0 0 1 4.2 0" stroke-linecap="round"
+					stroke-linejoin="round"></path>
+				<path d="M17 8.1l1.9-1.9a3 3 0 1 1 4.2 4.2l-1.9 1.9a3 3 0 0 1-4.2 0" stroke-linecap="round"
+					stroke-linejoin="round"></path>
+			</svg>
+			<input id="urlInput" type="url" spellcheck="false" autocomplete="off" placeholder="paste the link here" />
+		</label>
 
-        <div class="controls-row">
-            <div class="mode-group" role="radiogroup" aria-label="download mode">
-                <button class="mode-button active" data-mode="auto" role="radio" aria-checked="true" type="button">
-                    <svg class="mode-icon auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M12 4l1.4 3.5L17 9l-3.6 1.5L12 14l-1.4-3.5L7 9l3.6-1.5L12 4z" stroke-linejoin="round"></path>
-                        <path d="M6 14l.8 2L9 17l-2.2 1L6 20l-.8-2L3 17l2.2-1L6 14z" stroke-linejoin="round"></path>
-                    </svg>
-                    <span>auto</span>
-                </button>
-                <button class="mode-button" data-mode="audio" role="radio" aria-checked="false" type="button">
-                    <svg class="mode-icon audio" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M9 18V8l8-2v10" stroke-linecap="round" stroke-linejoin="round"></path>
-                        <circle cx="7" cy="18" r="2"></circle>
-                        <circle cx="17" cy="16" r="2"></circle>
-                    </svg>
-                    <span>audio</span>
-                </button>
-                <button class="mode-button" data-mode="mute" role="radio" aria-checked="false" type="button">
-                    <svg class="mode-icon mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                        <path d="M11 7L7.7 10H5v4h2.7L11 17V7z" stroke-linejoin="round"></path>
-                        <path d="M15 9l4 6" stroke-linecap="round"></path>
-                        <path d="M19 9l-4 6" stroke-linecap="round"></path>
-                    </svg>
-                    <span>mute</span>
-                </button>
-            </div>
+		<div class="controls-row">
+			<div class="mode-group" role="radiogroup" aria-label="download mode">
+				<button class="mode-button active" data-mode="auto" role="radio" aria-checked="true" type="button">
+					<svg class="mode-icon auto" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						aria-hidden="true">
+						<path d="M12 4l1.4 3.5L17 9l-3.6 1.5L12 14l-1.4-3.5L7 9l3.6-1.5L12 4z" stroke-linejoin="round">
+						</path>
+						<path d="M6 14l.8 2L9 17l-2.2 1L6 20l-.8-2L3 17l2.2-1L6 14z" stroke-linejoin="round"></path>
+					</svg>
+					<span>auto</span>
+				</button>
+				<button class="mode-button" data-mode="audio" role="radio" aria-checked="false" type="button">
+					<svg class="mode-icon audio" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						aria-hidden="true">
+						<path d="M9 18V8l8-2v10" stroke-linecap="round" stroke-linejoin="round"></path>
+						<circle cx="7" cy="18" r="2"></circle>
+						<circle cx="17" cy="16" r="2"></circle>
+					</svg>
+					<span>audio</span>
+				</button>
+				<button class="mode-button" data-mode="mute" role="radio" aria-checked="false" type="button">
+					<svg class="mode-icon mute" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+						aria-hidden="true">
+						<path d="M11 7L7.7 10H5v4h2.7L11 17V7z" stroke-linejoin="round"></path>
+						<path d="M15 9l4 6" stroke-linecap="round"></path>
+						<path d="M19 9l-4 6" stroke-linecap="round"></path>
+					</svg>
+					<span>mute</span>
+				</button>
+			</div>
 
-            <button id="downloadButton" class="download-button" type="button">
-                <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                    <rect x="6" y="4" width="12" height="16" rx="2" ry="2"></rect>
-                    <path d="M9 8h6" stroke-linecap="round"></path>
-                    <path d="M9 12h6" stroke-linecap="round"></path>
-                    <path d="M9 16h4" stroke-linecap="round"></path>
-                </svg>
-                <span>Download</span>
-            </button>
-        </div>
+			<button id="downloadButton" class="download-button" type="button">
+				<svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+					<rect x="6" y="4" width="12" height="16" rx="2" ry="2"></rect>
+					<path d="M9 8h6" stroke-linecap="round"></path>
+					<path d="M9 12h6" stroke-linecap="round"></path>
+					<path d="M9 16h4" stroke-linecap="round"></path>
+				</svg>
+				<span>Download</span>
+			</button>
+		</div>
 
-        <div id="statusLine" class="status-line" role="status" aria-live="polite"></div>
-    </main>
+		<div id="statusLine" class="status-line" role="status" aria-live="polite"></div>
+	</main>
 
-    <script type="module" src="popup.js"></script>
+	<script type="module" src="popup.js"></script>
 </body>
+
 </html>

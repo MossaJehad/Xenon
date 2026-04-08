@@ -1,17 +1,29 @@
 {
-    "manifest_version": 3,
-    "name": "Xenon",
-    "description": "Xenon-style popup shell",
-    "version": "0.1.0",
-    "permissions": [
-        "downloads"
-    ],
-    "host_permissions": [
-        "http://*/*",
-        "https://*/*"
-    ],
-    "action": {
-        "default_title": "Xenon",
-        "default_popup": "popup/popup.html"
-    }
+	"manifest_version": 3,
+	"name": "Xenon",
+	"description": "Xenon-style popup shell",
+	"version": "0.1.0",
+	"permissions": [
+		"downloads"
+	],
+	"host_permissions": [
+		"http://*/*",
+		"https://*/*"
+	],
+	"icons": {
+		"16": "assets/images/favicon.png",
+		"32": "assets/images/favicon.png",
+		"48": "assets/images/favicon.png",
+		"128": "assets/images/favicon.png"
+	},
+	"action": {
+		"default_title": "Xenon",
+		"default_popup": "popup/popup.html",
+		"default_icon": {
+			"16": "assets/images/favicon.png",
+			"32": "assets/images/favicon.png",
+			"48": "assets/images/favicon.png",
+			"128": "assets/images/favicon.png"
+		}
+	}
 }
