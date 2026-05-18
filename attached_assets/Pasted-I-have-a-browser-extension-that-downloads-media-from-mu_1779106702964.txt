@@ -1,0 +1,231 @@
+I have a browser extension that downloads media from multiple websites:
+
+* YouTube
+* Twitter/X
+* Facebook
+* Instagram
+* Pinterest
+* TikTok
+* Reddit
+* Vimeo
+* Twitch
+* SoundCloud
+* etc...
+
+Right now, the extension is NOT working correctly.
+
+---
+
+## ❌ Current Problem
+
+For major platforms like:
+
+* Twitter/X
+* YouTube
+* Facebook
+* Instagram
+* Pinterest
+* TikTok
+
+the extension sometimes downloads a `.txt` file instead of the actual media.
+
+The media detection/download pipeline is broken.
+
+---
+
+## 🎯 Main Goal
+
+I want to properly support the MAIN platforms first:
+
+* Twitter/X
+* YouTube
+* Facebook
+* Instagram
+* Pinterest
+* TikTok
+
+before worrying about smaller websites.
+
+---
+
+## ✅ Expected Behavior
+
+When the user selects:
+
+* video download → download actual video file
+* audio download → download actual audio file
+* image download → download actual image file
+
+NOT:
+
+* `.txt`
+* HTML
+* webpage source
+* manifest text
+* blob reference text
+* redirected page content
+
+---
+
+## 🔍 What I want you to investigate
+
+Please deeply inspect:
+
+### Media extraction logic
+
+* URL parsing
+* media source detection
+* manifest parsing
+* blob handling
+* fetch requests
+* response types
+* content-type validation
+* M3U8/MPD handling
+* signed/protected URLs
+* redirects
+
+---
+
+### Download pipeline
+
+Verify:
+
+* correct binary handling
+* proper blob creation
+* proper MIME types
+* proper file extensions
+* object URL generation
+* browser download API usage
+
+---
+
+### Platform-specific issues
+
+Investigate each major platform separately because each one behaves differently:
+
+#### YouTube
+
+* adaptive streams
+* audio/video separation
+* muxing logic if needed
+* streaming manifests
+
+#### Twitter/X
+
+* video variants
+* highest quality selection
+* authenticated media URLs
+
+#### Facebook
+
+* embedded video URLs
+* redirected media sources
+
+#### Instagram
+
+* reels/posts/stories handling
+* CDN URLs
+* media extraction timing
+
+#### TikTok
+
+* watermarked/non-watermarked variants
+* redirected media endpoints
+
+#### Pinterest
+
+* actual image/video source extraction
+
+---
+
+## ✅ Required Improvements
+
+### Correct media download
+
+The extension must:
+
+* download real media binaries
+* preserve correct file extensions
+* preserve media MIME type
+
+Examples:
+
+* `.mp4`
+* `.mp3`
+* `.m4a`
+* `.jpg`
+* `.png`
+* `.webm`
+
+NOT:
+
+* `.txt`
+
+---
+
+### Media type awareness
+
+If user chooses:
+
+* audio → download audio-only source
+* video → download video source
+* image → download image source
+
+---
+
+### Robustness
+
+Make the downloader:
+
+* resilient to redirects
+* resilient to expiring URLs
+* resilient to missing MIME types
+* resilient to blob URLs
+* resilient to dynamic page loading
+
+---
+
+## 🧱 Architecture Requirements
+
+* Refactor platform extractors cleanly
+* Separate extractor logic per platform
+* Avoid giant monolithic downloader logic
+* Add reusable media validation utilities
+* Add proper error handling/logging
+
+---
+
+## ✅ Debugging Requirements
+
+Add debugging/logging for:
+
+* detected media URL
+* detected MIME type
+* chosen download format
+* final filename
+* response headers
+* failed extraction reasons
+
+So future failures are easier to debug.
+
+---
+
+## ⚠️ Important
+
+Do NOT use hacks that only work temporarily.
+
+I want:
+
+* stable extraction
+* proper binary downloading
+* correct media handling
+* scalable architecture for future websites
+
+---
+
+## 🚫 Restrictions
+
+* Do NOT remove support for existing platforms
+* Do NOT hardcode temporary URLs
+* Do NOT break browser compatibility
+* Do NOT use git add/commit/push or any git commands

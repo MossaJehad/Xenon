@@ -69,6 +69,8 @@ async function getMediaId(postId, env) {
     return data?.media_id || "";
 }
 
+const IG_FETCH_HEADERS = { fetchHeaders: { "referer": "https://www.instagram.com/" } };
+
 function pickMedia(item, baseId) {
     if (!item) {
         return null;
@@ -82,26 +84,28 @@ function pickMedia(item, baseId) {
 
         if (first.video_versions?.length) {
             const best = first.video_versions.reduce((a, b) => (Number(a.width) * Number(a.height) >= Number(b.width) * Number(b.height) ? a : b));
-            return mediaResult(service, `instagram_${baseId}`, { videoUrl: best.url });
+            return mediaResult(service, `instagram_${baseId}`, { videoUrl: best.url, ...IG_FETCH_HEADERS });
         }
 
         if (first.image_versions2?.candidates?.length) {
             return mediaResult(service, `instagram_${baseId}`, {
                 imageUrl: first.image_versions2.candidates[0].url,
                 preferredImageExt: "jpg",
+                ...IG_FETCH_HEADERS,
             });
         }
     }
 
     if (item.video_versions?.length) {
         const best = item.video_versions.reduce((a, b) => (Number(a.width) * Number(a.height) >= Number(b.width) * Number(b.height) ? a : b));
-        return mediaResult(service, `instagram_${baseId}`, { videoUrl: best.url });
+        return mediaResult(service, `instagram_${baseId}`, { videoUrl: best.url, ...IG_FETCH_HEADERS });
     }
 
     if (item.image_versions2?.candidates?.length) {
         return mediaResult(service, `instagram_${baseId}`, {
             imageUrl: item.image_versions2.candidates[0].url,
             preferredImageExt: "jpg",
+            ...IG_FETCH_HEADERS,
         });
     }
 
@@ -167,7 +171,7 @@ export async function extract({ match, env, detectPlatform }) {
 
     const videoUrl = decodeQuotedValue(videoRaw ? `"${videoRaw}"` : "");
     if (videoUrl) {
-        return mediaResult(service, `instagram_${postId}`, { videoUrl });
+        return mediaResult(service, `instagram_${postId}`, { videoUrl, ...IG_FETCH_HEADERS });
     }
 
     const imageUrl = decodeQuotedValue(imageRaw ? `"${imageRaw}"` : "");
@@ -175,6 +179,7 @@ export async function extract({ match, env, detectPlatform }) {
         return mediaResult(service, `instagram_${postId}`, {
             imageUrl,
             preferredImageExt: "jpg",
+            ...IG_FETCH_HEADERS,
         });
     }
 

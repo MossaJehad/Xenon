@@ -22,5 +22,6 @@ export function mediaResult(service, base, data = {}) {
         preferredVideoExt: data.preferredVideoExt || "mp4",
         preferredAudioExt: data.preferredAudioExt || "mp3",
         preferredImageExt: data.preferredImageExt || "jpg",
+        fetchHeaders: data.fetchHeaders || {},
     };
 }

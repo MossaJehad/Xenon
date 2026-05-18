@@ -135,6 +135,8 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
     const musicPlay = detail?.music?.playUrl || "";
     const images = detail?.imagePost?.images || [];
 
+    const ttHeaders = { fetchHeaders: { "referer": "https://www.tiktok.com/" } };
+
     if (images.length) {
         const firstImage = images[0]?.imageURL?.urlList?.find((url) => url.includes(".jpeg?")) || "";
         const audioUrl = musicPlay || videoPlay;
@@ -143,6 +145,7 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
             return mediaResult(service, base, {
                 audioUrl,
                 preferredAudioExt: audioUrl.includes("audio_mpeg") ? "mp3" : "m4a",
+                ...ttHeaders,
             });
         }
 
@@ -151,6 +154,7 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
                 imageUrl: firstImage,
                 audioUrl,
                 preferredImageExt: "jpg",
+                ...ttHeaders,
             });
         }
 
@@ -158,6 +162,7 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
             return mediaResult(service, base, {
                 audioUrl,
                 preferredAudioExt: audioUrl.includes("audio_mpeg") ? "mp3" : "m4a",
+                ...ttHeaders,
             });
         }
 
@@ -173,6 +178,7 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
         return mediaResult(service, base, {
             audioUrl,
             preferredAudioExt: audioUrl.includes("audio_mpeg") ? "mp3" : "m4a",
+            ...ttHeaders,
         });
     }
 
@@ -182,5 +188,6 @@ export async function extract({ match, mode = "auto", detectPlatform, env }) {
 
     return mediaResult(service, base, {
         videoUrl: videoPlay,
+        ...ttHeaders,
     });
 }

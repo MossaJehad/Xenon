@@ -65,5 +65,6 @@ export async function extract({ match, env }) {
 
     return mediaResult(service, `facebook_${match.id || match.shortLink || "video"}`, {
         videoUrl,
+        fetchHeaders: { "referer": "https://www.facebook.com/" },
     });
 }

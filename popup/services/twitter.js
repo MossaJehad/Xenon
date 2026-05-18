@@ -64,6 +64,7 @@ export async function extract({ match, env }) {
         return mediaResult(service, `twitter_${id}`, {
             imageUrl,
             preferredImageExt: extFromUrl(imageUrl, "jpg"),
+            fetchHeaders: { "referer": "https://twitter.com/" },
         });
     }
 
@@ -85,5 +86,6 @@ export async function extract({ match, env }) {
     const best = variants.reduce((a, b) => (a.bitrate > b.bitrate ? a : b));
     return mediaResult(service, `twitter_${id}`, {
         videoUrl: best.url,
+        fetchHeaders: { "referer": "https://twitter.com/" },
     });
 }

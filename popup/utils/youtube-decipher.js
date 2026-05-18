@@ -118,6 +118,61 @@ function extractHelperSource(playerCode, fnSource) {
     return "";
 }
 
+function extractNParamName(playerCode) {
+    const patterns = [
+        /\.get\("n"\)\)&&\(b=([a-zA-Z0-9$]{2,})\[(\d+)\]?\(/,
+        /[a-zA-Z0-9$]{2}\.set\("n",([a-zA-Z0-9$]{2,})\(a\[0\]\)\)/,
+        /\.get\("n"\)&&\([a-z]=([a-zA-Z0-9$]{2,})\(/,
+        /n\[0\]=([a-zA-Z0-9$]{2,})\(/,
+    ];
+    for (const p of patterns) {
+        const m = playerCode.match(p);
+        if (m?.[1]) return m[1];
+    }
+    return "";
+}
+
+export async function getYoutubeNTransform(html) {
+    const playerUrl = extractPlayerUrl(html);
+    if (!playerUrl) return null;
+
+    const playerCode = await fetch(playerUrl).then((r) => r.text()).catch(() => "");
+    if (!playerCode) return null;
+
+    const fnName = extractNParamName(playerCode);
+    if (!fnName) return null;
+
+    const fnSource = extractFunctionSource(playerCode, fnName);
+    if (!fnSource) return null;
+
+    const helperSource = extractHelperSource(playerCode, fnSource);
+
+    try {
+        const fn = new Function(
+            "n",
+            `${helperSource}\n${fnSource}\nreturn ${fnName}(n);`,
+        );
+        return (n) => { try { return fn(n) || n; } catch { return n; } };
+    } catch {
+        return null;
+    }
+}
+
+export function applyNParam(url, nTransform) {
+    if (!nTransform) return url;
+    try {
+        const u = new URL(url);
+        const n = u.searchParams.get("n");
+        if (!n) return url;
+        const transformed = nTransform(n);
+        if (!transformed || transformed === n) return url;
+        u.searchParams.set("n", transformed);
+        return u.toString();
+    } catch {
+        return url;
+    }
+}
+
 export async function getYoutubeDecipher(html) {
     const playerUrl = extractPlayerUrl(html);
     if (!playerUrl) {

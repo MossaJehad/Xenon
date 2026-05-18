@@ -58,8 +58,10 @@ export async function extract({ match, env, detectPlatform }) {
         .map((m) => m[1].replaceAll("\\/", "/"))
         .find((url) => url.endsWith(".mp4"));
 
+    const pinHeaders = { fetchHeaders: { "referer": "https://www.pinterest.com/" } };
+
     if (video) {
-        return mediaResult(service, `pinterest_${id}`, { videoUrl: video });
+        return mediaResult(service, `pinterest_${id}`, { videoUrl: video, ...pinHeaders });
     }
 
     const image = [...html.matchAll(/src="(https:\/\/i\.pinimg\.com\/.*?\.(?:jpg|gif))"/g)]
@@ -72,5 +74,6 @@ export async function extract({ match, env, detectPlatform }) {
     return mediaResult(service, `pinterest_${id}`, {
         imageUrl: image,
         preferredImageExt: image.endsWith(".gif") ? "gif" : "jpg",
+        ...pinHeaders,
     });
 }

@@ -1,7 +1,8 @@
 import { textRequest } from "../utils/http.js";
 import { hostEnds, splitPath } from "../utils/url.js";
 import { mediaResult } from "../utils/result.js";
-import { getYoutubeDecipher, parseCipherUrl } from "../utils/youtube-decipher.js";
+import { getYoutubeDecipher, getYoutubeNTransform, applyNParam, parseCipherUrl } from "../utils/youtube-decipher.js";
+
 export const service = "youtube";
 
 export function match(url) {
@@ -142,6 +143,13 @@ function chooseBestBitrate(entries) {
     return entries.reduce((a, b) => (a.bitrate >= b.bitrate ? a : b));
 }
 
+const YT_HEADERS = {
+    fetchHeaders: {
+        "referer": "https://www.youtube.com/",
+        "origin": "https://www.youtube.com",
+    },
+};
+
 export async function extract({ match, env, mode = "auto", quality = "1080" }) {
     const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(match.id)}&hl=en`;
     const html = await textRequest(watchUrl, {
@@ -179,6 +187,12 @@ export async function extract({ match, env, mode = "auto", quality = "1080" }) {
         throw new Error("fetch.empty");
     }
 
+    const nTransform = await getYoutubeNTransform(html).catch(() => null);
+
+    function fixUrl(url) {
+        return nTransform ? applyNParam(url, nTransform) : url;
+    }
+
     const audioOnly = entries.filter((entry) => entry.isAudio);
     const muxed = entries.filter((entry) => entry.isVideo && entry.hasAudio);
     const videoOnly = entries.filter((entry) => entry.isVideo && !entry.hasAudio);
@@ -190,8 +204,9 @@ export async function extract({ match, env, mode = "auto", quality = "1080" }) {
         }
 
         return mediaResult(service, `youtube_${match.id}`, {
-            audioUrl: audio.url,
+            audioUrl: fixUrl(audio.url),
             preferredAudioExt: extFromMime(audio.mime, "m4a"),
+            ...YT_HEADERS,
         });
     }
 
@@ -202,16 +217,18 @@ export async function extract({ match, env, mode = "auto", quality = "1080" }) {
         }
 
         return mediaResult(service, `youtube_${match.id}`, {
-            videoUrl: video.url,
+            videoUrl: fixUrl(video.url),
             preferredVideoExt: extFromMime(video.mime, "mp4"),
+            ...YT_HEADERS,
         });
     }
 
     const bestMuxed = chooseByHeight(muxed, quality);
     if (bestMuxed?.url) {
         return mediaResult(service, `youtube_${match.id}`, {
-            videoUrl: bestMuxed.url,
+            videoUrl: fixUrl(bestMuxed.url),
             preferredVideoExt: extFromMime(bestMuxed.mime, "mp4"),
+            ...YT_HEADERS,
         });
     }
 
@@ -223,9 +240,10 @@ export async function extract({ match, env, mode = "auto", quality = "1080" }) {
     }
 
     return mediaResult(service, `youtube_${match.id}`, {
-        videoUrl: bestVideo.url,
-        audioUrl: bestAudio?.url || "",
+        videoUrl: fixUrl(bestVideo.url),
+        audioUrl: bestAudio?.url ? fixUrl(bestAudio.url) : "",
         preferredVideoExt: extFromMime(bestVideo.mime, "mp4"),
         preferredAudioExt: extFromMime(bestAudio?.mime || "", "m4a"),
+        ...YT_HEADERS,
     });
 }

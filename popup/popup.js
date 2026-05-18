@@ -4,6 +4,7 @@ import {
     chooseDownloadTarget,
     buildDownloadFilename,
 } from "./media-engine.js";
+import { smartDownload } from "./utils/download.js";
 
 const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
 const downloadButton = document.getElementById("downloadButton");
@@ -23,45 +24,6 @@ const setStatus = (text, type = "") => {
     if (type) {
         statusLine.classList.add(type);
     }
-};
-
-const triggerDownload = async (url, filename) => {
-    if (typeof chrome !== "undefined" && chrome.downloads?.download) {
-        return new Promise((resolve, reject) => {
-            chrome.downloads.download(
-                {
-                    url,
-                    filename,
-                    conflictAction: "uniquify",
-                    saveAs: false,
-                },
-                (downloadId) => {
-                    const err = chrome.runtime?.lastError;
-                    if (err) {
-                        reject(new Error(err.message));
-                        return;
-                    }
-
-                    if (!downloadId) {
-                        reject(new Error("download failed"));
-                        return;
-                    }
-
-                    resolve(downloadId);
-                },
-            );
-        });
-    }
-
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.rel = "noopener";
-    anchor.target = "_blank";
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
-    return 0;
 };
 
 for (const button of modeButtons) {
@@ -93,12 +55,17 @@ downloadButton?.addEventListener("click", async () => {
 
     try {
         const mode = getMode();
-        const detected = detectPlatform(rawUrl);
 
+        console.log("[xenon] ── new download ──────────────────────");
+        console.log("[xenon] raw url:", rawUrl);
+        console.log("[xenon] mode:", mode);
+
+        const detected = detectPlatform(rawUrl);
         if (detected.error) {
             throw new Error(detected.message || detected.error);
         }
 
+        console.log("[xenon] platform:", detected.service);
         setStatus(`platform = ${detected.service}`);
 
         const media = await fetchMediaCandidate(detected, mode);
@@ -106,17 +73,39 @@ downloadButton?.addEventListener("click", async () => {
             throw new Error(media.message || media.error);
         }
 
+        console.log("[xenon] media result:", {
+            service: media.service,
+            videoUrl: media.videoUrl ? `${media.videoUrl.slice(0, 80)}…` : "",
+            audioUrl: media.audioUrl ? `${media.audioUrl.slice(0, 80)}…` : "",
+            imageUrl: media.imageUrl ? `${media.imageUrl.slice(0, 80)}…` : "",
+            preferredVideoExt: media.preferredVideoExt,
+            preferredAudioExt: media.preferredAudioExt,
+            preferredImageExt: media.preferredImageExt,
+            fetchHeaders: media.fetchHeaders,
+        });
+
         const target = chooseDownloadTarget(media, mode);
         if (target.error || !target.url) {
             throw new Error(target.message || target.error || "media unavailable");
         }
 
-        const filename = buildDownloadFilename(media, target, mode);
-        await triggerDownload(target.url, filename);
+        console.log("[xenon] target:", { kind: target.kind, extension: target.extension, url: `${target.url.slice(0, 80)}…` });
 
-        setStatus(`download started -> ${filename}`, "ok");
+        const filename = buildDownloadFilename(media, target, mode);
+
+        console.log("[xenon] filename:", filename);
+        console.log("[xenon] fetch headers:", media.fetchHeaders);
+
+        setStatus("downloading...");
+
+        const finalFilename = await smartDownload(target.url, filename, media.fetchHeaders || {});
+
+        setStatus(`done → ${finalFilename}`, "ok");
+        console.log("[xenon] download complete →", finalFilename);
     } catch (error) {
-        setStatus(String(error?.message || error || "download failed"), "error");
+        const msg = String(error?.message || error || "download failed");
+        setStatus(msg, "error");
+        console.error("[xenon] download error:", msg);
     } finally {
         setTimeout(() => {
             downloadButton.classList.remove("pulse");
