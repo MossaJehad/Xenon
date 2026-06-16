@@ -181,6 +181,14 @@ export async function extract({ match, env, mode = "auto", quality = "1080" }) {
 
     const needsDecipher = rawFormats.some((entry) => !entry.url && (entry.signatureCipher || entry.cipher));
     const decipher = needsDecipher ? await getYoutubeDecipher(html) : null;
+
+    // Deciphering runs player JS via `new Function`, which the MV3 content
+    // security policy forbids. If the video is signed and we couldn't build a
+    // decipher, say so plainly instead of a vague "no media found".
+    if (needsDecipher && !decipher) {
+        throw new Error("youtube: signed video — deciphering blocked by extension security (MV3)");
+    }
+
     const entries = rawFormats.map((entry) => normalizeEntry(entry, decipher)).filter(Boolean);
 
     if (!entries.length) {

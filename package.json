@@ -1,0 +1,15 @@
+{
+	"name": "xenon",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Xenon — download video/audio from many sites (Chrome + Firefox).",
+	"scripts": {
+		"lint": "web-ext lint --source-dir .",
+		"build": "web-ext build --source-dir . --overwrite-dest",
+		"start:firefox": "web-ext run --source-dir .",
+		"sign:firefox": "web-ext sign --source-dir . --channel unlisted"
+	},
+	"devDependencies": {
+		"web-ext": "^8.3.0"
+	}
+}

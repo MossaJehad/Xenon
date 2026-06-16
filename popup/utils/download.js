@@ -1,164 +1,104 @@
-const MEDIA_PREFIXES = ["video/", "audio/", "image/", "application/octet-stream", "application/ogg", "application/mp4"];
-const BAD_PREFIXES = ["text/html", "text/plain", "application/json", "text/xml", "application/xml", "application/xhtml"];
+import { getRuntimeEnv } from "../core/env.js";
 
-function cleanCt(ct) {
-    return String(ct || "").toLowerCase().split(";")[0].trim();
+const api = globalThis.browser ?? globalThis.chrome;
+
+// Map the browser's download-interrupt reasons to something a human can act on.
+function humanizeDownloadError(reason) {
+	const r = String(reason || "").toUpperCase();
+	if (r.includes("FORBIDDEN")) return "server refused (403) — link expired or needs login/region";
+	if (r.includes("UNAUTHORIZED")) return "server needs authentication (401) — log in to the site first";
+	if (r.includes("BAD_CONTENT") || r.includes("NOT_FOUND")) return "media not found (404) — link may be wrong or removed";
+	if (r.includes("NETWORK")) return "network error while downloading";
+	if (r.includes("SERVER")) return "server error while downloading";
+	if (r.includes("USER_CANCELED") || r.includes("CANCELED")) return "download canceled";
+	return reason || "download failed";
 }
 
-function isMediaCt(ct) {
-    const c = cleanCt(ct);
-    if (!c) return true;
-    return MEDIA_PREFIXES.some((p) => c.startsWith(p));
+function messageBackground(payload) {
+	return new Promise((resolve, reject) => {
+		try {
+			const ret = api.runtime.sendMessage(payload, (response) => {
+				const err = api.runtime?.lastError;
+				if (err) {
+					reject(new Error(err.message));
+					return;
+				}
+				resolve(response);
+			});
+			// Firefox returns a promise and ignores the callback.
+			if (ret && typeof ret.then === "function") {
+				ret.then(resolve, reject);
+			}
+		} catch (err) {
+			reject(err);
+		}
+	});
 }
 
-function isBadCt(ct) {
-    const c = cleanCt(ct);
-    return BAD_PREFIXES.some((p) => c.startsWith(p));
-}
-
-function extFromCt(ct, fallback) {
-    const c = cleanCt(ct);
-    if (c.includes("mp4")) return "mp4";
-    if (c.includes("webm")) return "webm";
-    if (c.includes("ogg")) return "ogg";
-    if (c.includes("mpeg") || c.includes("mp3")) return "mp3";
-    if (c.includes("aac") || c.includes("m4a")) return "m4a";
-    if (c.includes("jpeg") || c.includes("jpg")) return "jpg";
-    if (c.includes("png")) return "png";
-    if (c.includes("gif")) return "gif";
-    if (c.includes("webp")) return "webp";
-    return fallback;
-}
-
-function applyCtExt(filename, ct) {
-    const ctExt = extFromCt(ct, "");
-    if (!ctExt) return filename;
-    const dot = filename.lastIndexOf(".");
-    const base = dot > 0 ? filename.slice(0, dot) : filename;
-    return `${base}.${ctExt}`;
-}
-
-async function chromeDl(url, filename) {
-    return new Promise((resolve, reject) => {
-        chrome.downloads.download(
-            { url, filename, conflictAction: "uniquify", saveAs: false },
-            (downloadId) => {
-                const err = chrome.runtime?.lastError;
-                if (err) { reject(new Error(err.message)); return; }
-                if (!downloadId) { reject(new Error("download id missing")); return; }
-                resolve(downloadId);
-            },
-        );
-    });
-}
-
+// Fallback for when the extension APIs are unavailable (e.g. the popup opened as
+// a plain web page during testing). Cannot set custom headers — best effort.
 function anchorDl(url, filename) {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.rel = "noopener";
-    a.target = "_blank";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = filename;
+	a.rel = "noopener";
+	a.target = "_blank";
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
 }
-
-async function triggerDl(url, filename) {
-    if (typeof chrome !== "undefined" && chrome.downloads?.download) {
-        return chromeDl(url, filename);
-    }
-    anchorDl(url, filename);
-}
-
-const BLOB_LIMIT = 100 * 1024 * 1024;
 
 export async function smartDownload(url, filename, fetchHeaders = {}) {
-    console.log("[xenon:download] url →", url);
-    console.log("[xenon:download] filename →", filename);
-    console.log("[xenon:download] headers →", fetchHeaders);
+	console.log("[xenon:download] url →", url);
+	console.log("[xenon:download] filename →", filename);
+	console.log("[xenon:download] headers →", fetchHeaders);
 
-    let contentType = "";
-    let contentLength = 0;
-    let headOk = false;
+	const referer = fetchHeaders.referer || fetchHeaders.Referer || "";
+	let origin = fetchHeaders.origin || fetchHeaders.Origin || "";
+	if (!origin && referer) {
+		try {
+			origin = new URL(referer).origin;
+		} catch {
+			origin = "";
+		}
+	}
 
-    try {
-        const head = await fetch(url, {
-            method: "HEAD",
-            headers: fetchHeaders,
-            credentials: "omit",
-        });
+	let userAgent = fetchHeaders["user-agent"] || fetchHeaders["User-Agent"] || "";
+	if (!userAgent) {
+		try {
+			userAgent = (await getRuntimeEnv()).XENON_BROWSER_UA || "";
+		} catch {
+			userAgent = "";
+		}
+	}
 
-        contentType = head.headers.get("content-type") || "";
-        contentLength = Number(head.headers.get("content-length") || 0);
-        headOk = head.ok;
+	// Preferred path: background worker injects Referer/Origin/User-Agent via
+	// declarativeNetRequest and lets the browser's download manager fetch it.
+	if (api?.runtime?.sendMessage && api?.runtime?.id) {
+		let res = null;
+		try {
+			res = await messageBackground({
+				type: "XENON_DOWNLOAD",
+				url,
+				filename,
+				referer,
+				origin,
+				userAgent,
+			});
+		} catch (err) {
+			console.warn("[xenon:download] background unreachable:", err?.message, "— using anchor fallback");
+		}
 
-        console.log("[xenon:download] HEAD status:", head.status, "| content-type:", contentType, "| content-length:", contentLength);
+		if (res) {
+			if (res.ok) {
+				console.log("[xenon:download] download complete →", res.filename || filename, res.started ? "(in progress)" : "");
+				return res.filename || filename;
+			}
+			throw new Error(humanizeDownloadError(res.error));
+		}
+	}
 
-        if (head.ok && isBadCt(contentType)) {
-            throw new Error(`server returned ${cleanCt(contentType)} — expected media (check login/geo restrictions)`);
-        }
-    } catch (headErr) {
-        if (headErr.message.includes("expected media")) {
-            throw headErr;
-        }
-        console.warn("[xenon:download] HEAD failed:", headErr?.message, "— skipping HEAD check");
-    }
-
-    const fixedFilename = applyCtExt(filename, contentType);
-    if (fixedFilename !== filename) {
-        console.log("[xenon:download] extension corrected →", fixedFilename);
-    }
-
-    const useBlobPath = headOk && (contentLength === 0 || contentLength <= BLOB_LIMIT);
-
-    if (useBlobPath) {
-        try {
-            console.log("[xenon:download] fetching as blob...");
-
-            const res = await fetch(url, {
-                headers: fetchHeaders,
-                credentials: "omit",
-            });
-
-            const ct = res.headers.get("content-type") || contentType;
-            console.log("[xenon:download] GET status:", res.status, "| content-type:", ct);
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status} ${res.statusText || ""}`);
-            }
-
-            if (isBadCt(ct)) {
-                throw new Error(`server returned ${cleanCt(ct)} — expected media`);
-            }
-
-            const blob = await res.blob();
-            console.log("[xenon:download] blob size:", blob.size, "bytes | type:", blob.type);
-
-            if (blob.size < 64) {
-                throw new Error("response too small to be valid media");
-            }
-
-            const finalName = applyCtExt(fixedFilename, blob.type || ct);
-            const objectUrl = URL.createObjectURL(blob);
-
-            try {
-                await triggerDl(objectUrl, finalName);
-                console.log("[xenon:download] blob download triggered →", finalName);
-                return finalName;
-            } finally {
-                setTimeout(() => URL.revokeObjectURL(objectUrl), 120_000);
-            }
-        } catch (blobErr) {
-            console.warn("[xenon:download] blob path failed:", blobErr?.message, "— falling back to direct download");
-            if (blobErr.message.includes("expected media")) {
-                throw blobErr;
-            }
-        }
-    } else {
-        console.log("[xenon:download] large file (", contentLength, "bytes) — using direct download");
-    }
-
-    await triggerDl(url, fixedFilename);
-    console.log("[xenon:download] direct download triggered →", fixedFilename);
-    return fixedFilename;
+	anchorDl(url, filename);
+	console.log("[xenon:download] anchor download triggered →", filename);
+	return filename;
 }

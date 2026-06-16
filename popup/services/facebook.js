@@ -48,6 +48,9 @@ export async function extract({ match, env }) {
     }
 
     const html = await textRequest(target, {
+        // include cookies so a logged-in user can pull videos that sit behind
+        // Facebook's login / consent wall (host_permissions cover facebook.com).
+        credentials: "include",
         headers: {
             "user-agent": env.XENON_BROWSER_UA,
             accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
@@ -55,11 +58,25 @@ export async function extract({ match, env }) {
         },
     });
 
-    const hd = html?.match(/"browser_native_hd_url":(".*?")/);
-    const sd = html?.match(/"browser_native_sd_url":(".*?")/);
+    if (!html) {
+        throw new Error("fetch.fail");
+    }
 
-    const videoUrl = decodeQuotedValue(hd?.[1]) || decodeQuotedValue(sd?.[1]);
+    // Facebook ships the media URL under several keys depending on surface.
+    const pick = (re) => decodeQuotedValue(html.match(re)?.[1]);
+    const videoUrl =
+        pick(/"browser_native_hd_url":(".*?")/) ||
+        pick(/"browser_native_sd_url":(".*?")/) ||
+        pick(/"playable_url_quality_hd":(".*?")/) ||
+        pick(/"playable_url":(".*?")/) ||
+        pick(/"hd_src":(".*?")/) ||
+        pick(/"sd_src":(".*?")/);
+
     if (!videoUrl) {
+        // No media + a login form in the response means we were served the wall.
+        if (/login|checkpoint|"loginInline"|You must log in/i.test(html)) {
+            throw new Error("content.login_required");
+        }
         throw new Error("fetch.empty");
     }
 

@@ -1,29 +1,46 @@
 {
 	"manifest_version": 3,
 	"name": "Xenon",
-	"description": "Xenon-style popup shell",
+	"description": "Download video/audio from many sites.",
 	"version": "0.1.0",
 	"permissions": [
-		"downloads"
+		"downloads",
+		"declarativeNetRequest",
+		"declarativeNetRequestWithHostAccess"
 	],
 	"host_permissions": [
 		"http://*/*",
 		"https://*/*"
 	],
+	"background": {
+		"service_worker": "background.js",
+		"scripts": [
+			"background.js"
+		]
+	},
+	"content_security_policy": {
+		"extension_pages": "script-src 'self'; object-src 'self'"
+	},
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "xenon-downloader@xenon.app",
+			"strict_min_version": "128.0"
+		}
+	},
 	"icons": {
-		"16": "assets/images/favicon.png",
-		"32": "assets/images/favicon.png",
-		"48": "assets/images/favicon.png",
-		"128": "assets/images/favicon.png"
+		"16": "assets/images/icon-16.png",
+		"32": "assets/images/icon-32.png",
+		"48": "assets/images/icon-48.png",
+		"128": "assets/images/icon-128.png"
 	},
 	"action": {
 		"default_title": "Xenon",
 		"default_popup": "popup/popup.html",
 		"default_icon": {
-			"16": "assets/images/favicon.png",
-			"32": "assets/images/favicon.png",
-			"48": "assets/images/favicon.png",
-			"128": "assets/images/favicon.png"
+			"16": "assets/images/icon-16.png",
+			"32": "assets/images/icon-32.png",
+			"48": "assets/images/icon-48.png",
+			"128": "assets/images/icon-128.png"
 		}
 	}
 }
